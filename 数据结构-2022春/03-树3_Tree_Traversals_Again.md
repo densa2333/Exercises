@@ -4,9 +4,7 @@
 
 An inorder binary tree traversal can be implemented in a non-recursive way with a stack. For example, suppose that when a 6-node binary tree (with the keys numbered from 1 to 6) is traversed, the stack operations are: push(1); push(2); push(3); pop(); pop(); push(4); pop(); pop(); push(5); push(6); pop(); pop(). Then a unique binary tree (shown in Figure 1) can be generated from this sequence of operations. Your task is to give the postorder traversal sequence of this tree.
 
-[Figure 1](https://github.com/densa2333/Exercises/blob/main/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84-2022%E6%98%A5/03-%E6%A0%913TreeTraversalsAgainF1.png)
-
-
+![Figure1](https://github.com/densa2333/Exercises/blob/main/assets/03F1.png)
 
 ## Input Specification
 
