@@ -95,7 +95,7 @@ int main()
         gets(s);
         if (strncmp(s, "Push", 4) == 0) {
             if (s[6]) num = 10 * (s[5] - '0') + s[6] - '0'; // tow bits
-            else num = s[5] - '0';							// one bits
+            else num = s[5] - '0';					// one bits
             Push(num, &Pre);
             pre[idxpre] = num;	//preoder traversal
             idxpre++;
@@ -172,7 +172,7 @@ void Solve(int preL, int inL, int postL, int n)
     /* construct left subtree by recursion */
     Solve(preL + 1, inL, postL, L);
     
-    /* construct right subtree by recur */
+    /* construct right subtree by recuri */
     Solve(preL + L + 1, inL + L + 1, postL + L, R);
 }
 ```
