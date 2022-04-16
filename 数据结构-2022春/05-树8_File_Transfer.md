@@ -26,6 +26,8 @@ where `C` stands for checking if it is possible to transfer files between `c1` a
 S
 ```
 
+where `S` stands for stopping this case.
+
 
 
 ## Output Specification
@@ -93,7 +95,112 @@ The network is connected.
 
 ## Solution
 
-```C
+`Find()`路径压缩
 
+`Union()`按秩归并
+
+```C
+#include <stdio.h>
+#define MaxSize 10000
+
+typedef int ElementType;
+typedef int SetName;
+typedef ElementType SetType[MaxSize];
+
+SetName Find(SetType, ElementType);
+void Union(SetType, SetName, SetName);
+void Initialize(SetType, int);
+void Input_connection(SetType);
+void Check_connection(SetType);
+void Check_network(SetType, int);
+
+int main(void)
+{
+    SetType S;
+    int i, n;
+    char in;
+    scanf("%d\n", &n);
+    Initialize(S, n);
+    do {
+        scanf("%c", &in);
+        switch (in) {
+            case 'I' : Input_connection(S); break;
+            case 'C' : Check_connection(S); break;
+            case 'S' : Check_network(S, n); break;
+        }
+    } while (in != 'S');
+    return 0;
+}
+
+/* compress path */
+SetName Find(SetType S, ElementType X)
+{
+    if (S[X] < 0)
+        return X;
+    else
+        return S[X] = Find(S, S[X]);
+}
+
+/* Union according to tank by sc*/
+void Union(SetType S, SetName Root1, SetName Root2)
+{
+    /* S[Root] is a negative number with scale number */
+    if (S[Root2] < S[Root1]) {
+        S[Root2] += S[Root1];
+        S[Root1] = Root2;
+    }
+    else if (S[Root1] > S[Root2]) {
+        S[Root1] += S[Root2];
+        S[Root2] = Root1;
+    }
+    else {
+        S[Root1]--;
+        S[Root2] = Root1;
+    }
+}
+
+void Initialize(SetType S, int n)
+{
+    for (int i = 0; i < n; i++) S[i] = -1;
+}
+
+void Input_connection(SetType S)
+{
+    ElementType u, v;
+    SetName Root1, Root2;
+    scanf("%d%d\n", &u, &v);
+    /* 1 ~ N  ->  0 ~ N-1 */
+    Root1 = Find(S, u - 1);
+    Root2 = Find(S, v - 1);
+    if (Root1 != Root2)
+        Union(S, Root1, Root2);
+    return;
+}
+
+void Check_connection(SetType S)
+{
+    ElementType u, v;
+    SetName Root1, Root2;
+    scanf("%d%d\n", &u, &v);
+    Root1 = Find(S, u - 1);
+    Root2 = Find(S, v - 1);
+    if (Root1 == Root2)
+        printf("yes\n");
+    else
+        printf("no\n");
+    return;
+}
+
+void Check_network(SetType S, int n)
+{
+    int i, counter = 0;
+    for (i = 0; i < n; i++) {
+        if (S[i] < 0) counter++;
+    }
+    if (counter == 1)
+        printf("The network is connected.\n");
+    else
+        printf("There are %d components.\n", counter);
+}
 ```
 
