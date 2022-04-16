@@ -8,7 +8,7 @@ In 1953, David A. Huffman published his paper "A Method for the Construction of 
 
 ## Input Specification
 
-Each input file contains one test case. For each case, the first line gives an integer *N* (2≤*N*≤63), then followed by a line that contains all the *N* distinct characters and their frequencies in the following format:
+Each input file contains one test case. For each case, the first line gives an integer *N* (2 ≤ *N* ≤ 63), then followed by a line that contains all the *N* distinct characters and their frequencies in the following format:
 
 ```
 c[1] f[1] c[2] f[2] ... c[N] f[N]
@@ -84,6 +84,19 @@ No
 
 
 ## Solution
+
+题意理解：
+
+- Huffman 编码不唯一（左右子树交换）
+- 最优编玛不一定通过 Huffman 编码得到（不是通过最小值合并构造）
+
+Huffman Codes 的特点：
+
+1. 最优编玛 —— 总长度（WPL）最小
+2. 无歧义解码 —— 前缀码：数据仅存于叶结点
+3. 没有度为 1 的结点 —— 满足 1、2 则必然有 3
+
+（注意：满足 2、 3 不一定有 1）
 
 ```C
 ```
