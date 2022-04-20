@@ -98,6 +98,237 @@ Huffman Codes 的特点：
 
 （注意：满足 2、 3 不一定有 1）
 
+- 核心算法：
+  - 计算最优编玛长度：
+    - 根据建造的 HuffmanTree 递归求解 WPL
+  - 对每位学生的提交检查：
+    - 长度是否正确
+    - 建树的过程中检查是否满足前缀码要求
+- 难点：
+  - 堆中元素是 HuffmanTree 的结点而不是指针，堆中操作的是结点而不是指针！
+  - 是否熟练掌握堆的操作集
+
 ```C
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <string.h>
+#define MINDATA -1000
+#define ERROR NULL
+
+typedef struct TreeNode *HuffmanTree;
+typedef struct TreeNode {
+    int Weight;
+    HuffmanTree Left, Right;
+} TreeNode;
+
+typedef TreeNode ElementType;
+typedef struct Heap *MinHeap;
+struct Heap {
+    ElementType *Data;
+    int Size;
+    int Capacity;
+};
+
+MinHeap CreateHeap(int);
+MinHeap BuildMinHeap(int);
+HuffmanTree DeleteMin(MinHeap);
+bool Insert(MinHeap, HuffmanTree);
+bool IsFull(MinHeap);
+bool IsEmpty(MinHeap);
+void freeTree(HuffmanTree);
+HuffmanTree CreateTreeNode(int, int);
+
+HuffmanTree Huffman(MinHeap);
+int WPL(HuffmanTree, int);
+void Submit(int, int);
+
+int f[1001];
+
+int main(void)
+{
+    int i, j, n, m, Codelen;
+    
+    scanf("%d", &n);
+    getchar();
+    MinHeap H = BuildMinHeap(n);
+    HuffmanTree T = Huffman(H);
+    Codelen = WPL(T, 0);
+
+    scanf("%d", &m);
+    getchar();
+    for (i = 0; i < m; i++)
+        Submit(n, Codelen);
+
+    return 0;
+}
+
+MinHeap CreateHeap(int MaxSize)
+{
+    MinHeap H = malloc(sizeof(struct Heap));
+    H->Data = malloc((MaxSize + 1) * sizeof(ElementType));
+    H->Size = 0;
+    H->Capacity = MaxSize;
+    H->Data[0].Weight = MINDATA;
+    H->Data[0].Left = H->Data[0].Right = NULL;
+    return H;
+}
+
+MinHeap BuildMinHeap(int n)
+{
+    int i;
+    HuffmanTree node;
+    MinHeap H = CreateHeap(n);
+    for (i = 0; i < n; i++) {
+        getchar();
+        getchar();
+        scanf("%d", &f[i]);
+        getchar();
+        node = malloc(sizeof(struct TreeNode));
+        node->Weight = f[i];
+        node->Left = node->Right = NULL;
+        Insert(H, node);
+    }
+    free(node);
+    return H;
+}
+
+HuffmanTree DeleteMin(MinHeap H)
+{
+    int Parent, Child;
+    ElementType tmp;
+    HuffmanTree MinItem = malloc(sizeof(struct TreeNode));
+    if (IsEmpty(H)) {
+        printf("MinHeap is empty\n");
+        return ERROR;
+    }
+    *MinItem = H->Data[1];
+    tmp = H->Data[H->Size--];
+    for (Parent = 1; Parent * 2 <= H->Size; Parent = Child) {
+        Child = Parent * 2;
+        if (Child != H->Size && H->Data[Child].Weight > H->Data[Child + 1].Weight)
+            Child++;
+        if (tmp.Weight > H->Data[Child].Weight)
+            H->Data[Parent] = H->Data[Child];
+        else
+            break;
+    }
+    H->Data[Parent] = tmp;
+    return MinItem;
+}
+
+bool Insert(MinHeap H, HuffmanTree T)
+{
+    int i;
+    if (IsFull(H)) {
+        printf("MinHeap is full\n");
+        return false;
+    }
+    for (i = ++H->Size; H->Data[i / 2].Weight > T->Weight; i /= 2)
+        H->Data[i] = H->Data[i / 2];
+    H->Data[i] = *T;
+    return true;
+}
+
+bool IsFull(MinHeap H)
+{
+    return (H->Size == H->Capacity);
+}
+
+bool IsEmpty(MinHeap H)
+{
+    return (H->Size == 0);
+}
+
+void freeTree(HuffmanTree T)
+{
+    if (T) {
+        freeTree(T->Left);
+        freeTree(T->Right);
+        free(T);
+    } else
+        free(T);
+}
+
+HuffmanTree Huffman(MinHeap H)
+{
+    int i;
+    HuffmanTree T;
+    for (i = 1; i < H->Capacity; i++) {
+        T = malloc(sizeof(struct TreeNode));
+        T->Left = DeleteMin(H);
+        T->Right = DeleteMin(H);
+        T->Weight = T->Left->Weight + T->Right->Weight;
+        Insert(H, T);
+    }
+    T = DeleteMin(H);
+    return T;
+}
+
+int WPL(HuffmanTree T, int Depth)
+{
+    if (!T->Left && !T->Right)
+        return (Depth * T->Weight);
+    else
+        return (WPL(T->Left, Depth + 1) + WPL(T->Right, Depth + 1));
+}
+
+HuffmanTree CreateTreeNode(int a, int b)
+{
+    HuffmanTree T = malloc(sizeof(struct TreeNode));
+    if (a == b) T->Weight = 0;
+    else T->Weight = 1;
+    T->Left = T->Right = NULL;
+    return T;
+}
+
+void Submit(int n, int Codelen)
+{
+    bool flag = true;
+    int i, j, len, wpl;
+    char code[64][1001];
+    HuffmanTree T = NULL, root = CreateTreeNode(1, 2);
+
+    for (i = 0; i < n; i++) {
+        gets(code[i]);
+    }
+
+    wpl = 0;
+    for (i = 0; i < n; i++) {
+        len = strlen(code[i]) - 2;
+        if (len > n - 1) {
+            flag = false;
+        }
+        wpl += len * f[i];
+    }
+    if (wpl != Codelen) {
+        flag = false;
+    }
+    
+    for (i = 0; i < n && flag; i++) {
+        len = strlen(code[i]);
+        T = root;
+        for (j = 2; j < len && flag; j++) {
+            if (code[i][j] == '0') {
+                if (!T->Left) {
+                    T->Left = CreateTreeNode(j, len - 1);
+                } else if (!T->Left->Weight) flag = false;
+                T = T->Left;
+            }
+            if (code[i][j] == '1') {
+                if (!T->Right) {
+                    T->Right = CreateTreeNode(j, len - 1);
+                } else if (!T->Right->Weight) flag = false;
+                T = T->Right;
+            }
+            if (j == len - 1 && (T->Left || T->Right)) flag = false;
+        }
+    }
+
+    if (flag) printf("Yes\n");
+    else printf("No\n");
+    freeTree(T);
+    return;
+}
 ```
 
