@@ -124,7 +124,7 @@ void Input()
 
 bool FirstJump(int v)
 {
-    return croc[v].x * croc[v].x + croc[v].y * croc[v].y <= (15 + d) * (15 + d);
+    return croc[v].x * croc[v].x + croc[v].y * croc[v].y <= (7.5 + d) * (7 + d);
 }
 
 bool IsSafe(int v)
