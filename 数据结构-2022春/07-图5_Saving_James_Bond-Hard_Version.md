@@ -94,17 +94,160 @@ For each test case, if James can escape, output in one line the minimum number o
 
 
 
-### 第三次尝试：换用 Floyd 算法
+### 第三次尝试（AC）：Dijkstra 只改一点
 
-Floyd
+不用排序，只需要第一跳的鳄鱼到原点的权重就够了！其他边的权重全改为 1
 
 ```C
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <math.h>
+#define MAX 102
+#define INF 0xfffffff
+#define ERROR -1
 
+typedef struct {
+    int x, y;
+} coordinate;
+
+int n, d, dist[MAX], path[MAX];
+bool collected[MAX];
+coordinate croc[MAX];
+int G[MAX][MAX];
+
+void Input();
+bool FirstJump(int);
+bool Jump(int, int);
+bool IsSafe(int);
+bool Qualified(int);
+void Save007();
+int FindMinDist();
+void Dijkstra(int);
+void Print(int);
+int Min(int a, int b) { return a < b ? a : b; }
+
+int main()
+{
+    Input();
+    if (7.5 + d >= 50) printf("1");
+    else Save007();
+    return 0;
+}
+
+void Input()
+{
+    int i, j;
+    scanf("%d%d", &n, &d);
+    for (i = 0; i <= n + 1; i++)
+        for (j = 0; j <= n + 1; j++)
+            G[i][j] = INF;
+    for (i = 1; i <= n; i++)
+        scanf("%d%d", &croc[i].x, &croc[i].y);
+
+    for (i = 1; i <= n; i++) {
+        if (FirstJump(i) && Qualified(i)) {
+            G[0][i] = G[i][0] = croc[i].x * croc[i].x + croc[i].y * croc[i].y; // squared
+        }
+        if (IsSafe(i) && Qualified(i)) {
+            G[i][n + 1] = G[n + 1][i] = 1; //NO NEED TO BE WEIGHTED!!!
+        }
+        for (j = 1; j <= n; j++) {
+            if (Jump(i, j) && Qualified(i) && Qualified(j)) {
+                G[i][j] = G[j][i] = 1; //NO NEED TO BE WEIGHTED!!!
+            }
+        }
+    }
+}
+
+bool FirstJump(int v)
+{
+    return croc[v].x * croc[v].x * 100 + croc[v].y * croc[v].y * 100 <= (75 + d * 10) * (75 + d * 10);
+}
+
+bool IsSafe(int v)
+{
+    return croc[v].x + d >= 50 || croc[v].x - d <= -50 || croc[v].y + d >= 50 || croc[v].x - d <= -50;
+}
+
+bool Jump(int v, int w)
+{
+    return (croc[v].x - croc[w].x) * (croc[v].x - croc[w].x) + (croc[v].y - croc[w].y) * (croc[v].y - croc[w].y) <= d * d;
+}
+
+bool Qualified(int i)
+{
+    return !(croc[i].x <= -50 || croc[i].x >= 50 || croc[i].y <= -50 || croc[i].y >= 50 || croc[i].x * croc[i].x * 100 + croc[i].y * croc[i].y * 100 <= 75 * 75);
+}
+
+void Save007()
+{
+    int i = n + 1, jumptimes = 0;
+    Dijkstra(0);
+    while (path[i] != -1) {
+        jumptimes++;
+        i = path[i];
+    }
+    printf("%d\n", jumptimes);
+    Print(n + 1);
+}
+
+int FindMinDist()
+{
+    int MinV, V;
+    int MinDist = INF;
+
+    for (V = 0; V <= n + 1; V++) {
+        if (collected[V] == false && dist[V] < MinDist) {
+            MinDist = dist[V];
+            MinV = V;
+        }
+    }
+    if (MinDist < INF)
+        return MinV;
+    else
+        return ERROR;
+}
+
+void Dijkstra(int s)
+{
+    int v, w;
+    for (v = 0; v <= n + 1; v++) {
+        dist[v] = G[s][v];
+        if (dist[v] < INF) path[v] = s;
+        else path[v] = -1;
+        collected[v] = false;
+    }
+
+    dist[s] = 0;
+    collected[s] = true;
+    while (1) {
+        v = FindMinDist();
+        if (v == ERROR) break;
+        collected[v] = true;
+        for (w = 0; w <= n + 1; w++) {
+            if (collected[w] == false && G[v][w] < INF)
+                if (dist[v] + G[v][w] < dist[w]) {
+                    dist[w] = dist[v] + G[v][w];
+                    path[w] = v;
+                }
+        }
+    }
+}
+
+void Print(int v)
+{
+    if (path[v] == -1) return;
+    Print(path[v]);
+    if (v != n + 1) printf("%d %d\n", croc[v].x, croc[v].y);
+}
 ```
 
-### 第二次尝试：无法通过测试点 4，即后面要更新前面的最短路，没有生成最短路
+### 第二次尝试（WA）：无法通过测试点 4，即后面要更新前面的最短路，没有生成最短路
 
 Dijkstra
+
+给结点排序无效
 
 ```C
 #include <stdio.h>
@@ -140,7 +283,7 @@ int Min(int a, int b) { return a < b ? a : b; }
 int main()
 {
     Input();
-    if (d >= 50) printf("1");
+    if (7.5 + d >= 50) printf("1");
     else Save007();
     return 0;
 }
