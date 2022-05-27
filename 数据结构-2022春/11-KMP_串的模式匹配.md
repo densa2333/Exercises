@@ -52,6 +52,68 @@ Not Found
 
 ## 解
 
+KMP 算法
+
 ```C
+#include <stdio.h>
+#include <string.h> 
+#include <stdlib.h>
+#define MAXSIZE 1000001
+#define NotFound -1
+typedef int Position;
+
+Position KMP(char *string, char *pattern);
+void BuildMatch(char *pattern, int *match);
+
+int main()
+{
+    char string[MAXSIZE], pattern[MAXSIZE];
+    int n;
+    scanf("%s", string);
+    getchar();
+    scanf("%d", &n);
+    while (n--) {
+        getchar();
+        scanf("%s", pattern);
+        Position p = KMP(string, pattern);
+        if (p == NotFound) printf("Not Found\n");
+        else printf("%s\n", string + p);
+    }
+    return 0;
+}
+
+Position KMP(char *string, char *pattern)
+{
+    int n = strlen(string);
+    int m = strlen(pattern);
+    int s, p, *match;
+
+    match = (int *)malloc(sizeof(int) * m);
+    BuildMatch(pattern, match);
+    s = p = 0;
+    while (s < n && p < m) {
+        if (string[s] == pattern[p]) { s++; p++; }
+        else if (p > 0) p = match[p - 1] + 1;
+        else s++;
+    }
+    return (p == m) ? (s - m) : NotFound;
+}
+
+/* 动态规划 */
+void BuildMatch(char *pattern, int *match)
+{
+    int i, j;
+    int m = strlen(pattern);
+    match[0] = -1; //初始条件
+    for (j = 1; j < m; j++) {
+        i = match[j - 1];
+        while ((i >= 0) && (pattern[i + 1] != pattern[j]))
+            i = match[i];
+        if (pattern[i + 1] == pattern[j])
+            match[j] = i + 1;
+        else
+            match[j] = -1;
+    }
+}
 ```
 
