@@ -46,6 +46,97 @@ For each case, simply print in a line the minimum number of swaps need to sort t
 
 ## Solution
 
+N 个数字的排列由若干个独立的环组成
+
+此题里环分三种：
+
+- 只有一个元素，不需要交换  
+- 环里 n~0~ 个元素，包括 0 ：需要 n~0~ - 1 次交换  
+- 第 i 个环里有 n~i~ 个元素，不包括 0 ：先把 0 换到环里，再进行 (n~i~ + 1) - 1 次交换——一共是 n~i~ + 1 次交换
+
+### 第二次尝试（AC）网上答案
+
+```c
+#include<stdio.h>
+#include<stdlib.h>
+int main()
+{
+    int i,n,tmp,num,*arr;
+    scanf("%d",&n);
+    arr = (int *)malloc(n*sizeof(int));
+    
+    for(i=0;i<n;i++) 
+        scanf("%d",&arr[i]);
+    num = 0;
+    i = 0;
+    if(arr[0] == 0) i=1;
+    for(;i<n;++i) {
+        if(arr[i] != i) {
+            ++ num;
+            while(arr[i] != i) {
+                if(arr[i] == 0) // 环中含 0
+                    --num;
+                else            // 环中不含 0
+                    ++num;
+                tmp = arr[i];
+                arr[i] = i;
+                i = tmp;
+            }
+        }
+    }
+    printf("%d",num);
+    free(arr);
+    return 0;
+}
+```
+
+### 第一次尝试（TLE）
+
+先表排序，再模拟交换次数
+
 ```C
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    int i, j, n, tmp, p, cnt, sum, *a, *t;
+    scanf("%d", &n);
+    a = (int*)malloc(sizeof(int) * n);
+    t = (int*)malloc(sizeof(int) * n);
+    for (i = 0; i < n; i++) scanf("%d", &a[i]);
+    for (i = 0; i < n; i++) t[i] = i;
+    // 插入排序
+    for (i = 1; i < n; i++) {
+        tmp = t[i];
+        for (j = i; j > 0 && a[t[j - 1]] > a[tmp]; j--)
+            t[j] = t[j - 1];
+        t[j] = tmp;
+    }
+    // 计算交换次数
+    sum = 0;
+    for (i = 0; i < n; i++) {
+        cnt = 0;
+        if (t[i] != i) {
+            // 是否含零
+            if (a[t[i]] == 0) cnt--;
+            else cnt++;
+            //进入该环
+            j = i;
+            tmp = a[j];
+            while (t[j] != j) {
+                a[j] = a[t[j]];
+                p = j;
+                j = t[j];
+                t[p] = p;
+                cnt++;
+            }
+            a[p] = tmp;
+        }
+        sum += cnt;
+    }
+    printf("%d\n", sum);
+    return 0;
+}
 ```
 
